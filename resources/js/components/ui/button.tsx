@@ -53,6 +53,15 @@ function Button({
   }) {
   const Comp = asChild ? Slot : "button"
   const isDisabled = disabled || loading
+  const buttonChildren =
+    loading && !asChild ? (
+      <>
+        <Spinner />
+        {loadingText ?? children}
+      </>
+    ) : (
+      children
+    )
 
   return (
     <Comp
@@ -63,8 +72,7 @@ function Button({
       aria-busy={loading ? true : undefined}
       {...props}
     >
-      {loading && !asChild && <Spinner />}
-      {loading && !asChild ? (loadingText ?? children) : children}
+      {buttonChildren}
     </Comp>
   )
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Tenant;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -13,7 +14,9 @@ test('guests are redirected from the user management page', function () {
 });
 
 test('authenticated users can view the user management page', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->superAdmin()->create();
+    $tenant = Tenant::factory()->create();
+    actingAsSuperAdmin($user, $tenant);
 
     $this->actingAs($user)
         ->get(route('users.index'))
@@ -26,7 +29,9 @@ test('authenticated users can view the user management page', function () {
 });
 
 test('users are paginated', function () {
-    $admin = User::factory()->create();
+    $admin = User::factory()->superAdmin()->create();
+    $tenant = Tenant::factory()->create();
+    actingAsSuperAdmin($admin, $tenant);
     User::factory()->count(30)->create();
 
     $this->actingAs($admin)
@@ -41,7 +46,9 @@ test('users are paginated', function () {
 });
 
 test('users can choose rows per page', function () {
-    $admin = User::factory()->create();
+    $admin = User::factory()->superAdmin()->create();
+    $tenant = Tenant::factory()->create();
+    actingAsSuperAdmin($admin, $tenant);
     User::factory()->count(30)->create();
 
     $this->actingAs($admin)
@@ -57,7 +64,9 @@ test('users can choose rows per page', function () {
 });
 
 test('invalid rows per page falls back to the default', function () {
-    $admin = User::factory()->create();
+    $admin = User::factory()->superAdmin()->create();
+    $tenant = Tenant::factory()->create();
+    actingAsSuperAdmin($admin, $tenant);
     User::factory()->count(30)->create();
 
     $this->actingAs($admin)
@@ -72,7 +81,9 @@ test('invalid rows per page falls back to the default', function () {
 });
 
 test('users can be searched by name or email', function () {
-    $admin = User::factory()->create();
+    $admin = User::factory()->superAdmin()->create();
+    $tenant = Tenant::factory()->create();
+    actingAsSuperAdmin($admin, $tenant);
     User::factory()->create(['name' => 'Alice Searchable', 'email' => 'alice@example.com']);
     User::factory()->create(['name' => 'Bob Person', 'email' => 'bob-searchable@example.com']);
     User::factory()->create(['name' => 'Charlie Person', 'email' => 'charlie@example.com']);
@@ -90,7 +101,9 @@ test('users can be searched by name or email', function () {
 });
 
 test('users can be filtered by status', function () {
-    $admin = User::factory()->create();
+    $admin = User::factory()->superAdmin()->create();
+    $tenant = Tenant::factory()->create();
+    actingAsSuperAdmin($admin, $tenant);
     User::factory()->create(['name' => 'Verified Person']);
     User::factory()->unverified()->create(['name' => 'Unverified Person']);
 
@@ -106,7 +119,9 @@ test('users can be filtered by status', function () {
 });
 
 test('empty search results are returned clearly', function () {
-    $admin = User::factory()->create();
+    $admin = User::factory()->superAdmin()->create();
+    $tenant = Tenant::factory()->create();
+    actingAsSuperAdmin($admin, $tenant);
     User::factory()->create(['name' => 'Visible User', 'email' => 'visible@example.com']);
 
     $this->actingAs($admin)
@@ -120,7 +135,9 @@ test('empty search results are returned clearly', function () {
 });
 
 test('users can be created', function () {
-    $admin = User::factory()->create();
+    $admin = User::factory()->superAdmin()->create();
+    $tenant = Tenant::factory()->create();
+    actingAsSuperAdmin($admin, $tenant);
 
     $this->actingAs($admin)
         ->post(route('users.store'), [
@@ -136,7 +153,9 @@ test('users can be created', function () {
 });
 
 test('user mutations preserve selected rows per page', function () {
-    $admin = User::factory()->create();
+    $admin = User::factory()->superAdmin()->create();
+    $tenant = Tenant::factory()->create();
+    actingAsSuperAdmin($admin, $tenant);
 
     $this->actingAs($admin)
         ->post(route('users.store'), [
@@ -153,7 +172,9 @@ test('user mutations preserve selected rows per page', function () {
 });
 
 test('user mutations preserve selected status filter', function () {
-    $admin = User::factory()->create();
+    $admin = User::factory()->superAdmin()->create();
+    $tenant = Tenant::factory()->create();
+    actingAsSuperAdmin($admin, $tenant);
 
     $this->actingAs($admin)
         ->post(route('users.store'), [
@@ -171,7 +192,9 @@ test('user mutations preserve selected status filter', function () {
 });
 
 test('user creation validates required fields and duplicate email addresses', function () {
-    $admin = User::factory()->create();
+    $admin = User::factory()->superAdmin()->create();
+    $tenant = Tenant::factory()->create();
+    actingAsSuperAdmin($admin, $tenant);
     User::factory()->create(['email' => 'duplicate@example.com']);
 
     $this->actingAs($admin)
@@ -186,7 +209,9 @@ test('user creation validates required fields and duplicate email addresses', fu
 });
 
 test('users can be updated', function () {
-    $admin = User::factory()->create();
+    $admin = User::factory()->superAdmin()->create();
+    $tenant = Tenant::factory()->create();
+    actingAsSuperAdmin($admin, $tenant);
     $user = User::factory()->create();
 
     $this->actingAs($admin)
@@ -205,7 +230,9 @@ test('users can be updated', function () {
 });
 
 test('user updates validate required fields and duplicate email addresses', function () {
-    $admin = User::factory()->create();
+    $admin = User::factory()->superAdmin()->create();
+    $tenant = Tenant::factory()->create();
+    actingAsSuperAdmin($admin, $tenant);
     $user = User::factory()->create();
     User::factory()->create(['email' => 'duplicate@example.com']);
 
@@ -220,7 +247,9 @@ test('user updates validate required fields and duplicate email addresses', func
 });
 
 test('eligible users can be deleted', function () {
-    $admin = User::factory()->create();
+    $admin = User::factory()->superAdmin()->create();
+    $tenant = Tenant::factory()->create();
+    actingAsSuperAdmin($admin, $tenant);
     $user = User::factory()->create();
 
     $this->actingAs($admin)
@@ -232,7 +261,9 @@ test('eligible users can be deleted', function () {
 });
 
 test('canceling deletion makes no server-side change', function () {
-    $admin = User::factory()->create();
+    $admin = User::factory()->superAdmin()->create();
+    $tenant = Tenant::factory()->create();
+    actingAsSuperAdmin($admin, $tenant);
     $user = User::factory()->create();
 
     $this->actingAs($admin)
@@ -243,7 +274,9 @@ test('canceling deletion makes no server-side change', function () {
 });
 
 test('current user cannot delete their own account', function () {
-    $admin = User::factory()->create();
+    $admin = User::factory()->superAdmin()->create();
+    $tenant = Tenant::factory()->create();
+    actingAsSuperAdmin($admin, $tenant);
 
     $this->actingAs($admin)
         ->delete(route('users.destroy', $admin))
@@ -253,7 +286,9 @@ test('current user cannot delete their own account', function () {
 });
 
 test('deleting the last user on a page redirects to the nearest available page', function () {
-    $admin = User::factory()->create();
+    $admin = User::factory()->superAdmin()->create();
+    $tenant = Tenant::factory()->create();
+    actingAsSuperAdmin($admin, $tenant);
     $target = User::factory()->create();
     User::factory()->count(9)->create();
 
