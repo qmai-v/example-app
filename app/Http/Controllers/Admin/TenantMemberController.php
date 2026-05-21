@@ -41,7 +41,7 @@ class TenantMemberController extends Controller
                 ],
                 'role' => $membership->role->value,
                 'created_at' => $membership->created_at->toISOString(),
-        ]);
+            ]);
 
         return Inertia::render('admin/tenants/members', [
             'targetTenant' => [
@@ -65,7 +65,7 @@ class TenantMemberController extends Controller
     public function store(StoreTenantMemberRequest $request, Tenant $tenant): RedirectResponse
     {
         try {
-            $this->memberships->addMemberOnTenant($tenant, (string) $request->validated('email'), $request->memberRole());
+            $this->memberships->addMemberOnTenant($tenant, $request->memberUserAttributes(), $request->memberRole());
         } catch (MemberAlreadyExistsException $e) {
             return back()->withErrors(['email' => $e->getMessage()]);
         }

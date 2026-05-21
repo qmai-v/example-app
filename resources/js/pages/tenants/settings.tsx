@@ -1,4 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
+import { useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { update as settingsUpdate } from '@/actions/App/Http/Controllers/Tenant/SettingsController';
 import Heading from '@/components/heading';
@@ -21,9 +22,21 @@ type Props = {
 export default function TenantSettings({ currentTenant, canEditSlug }: Props) {
     const form = useForm<{ name: string }>({ name: currentTenant.name });
 
+    useEffect(() => {
+        form.setData('name', currentTenant.name);
+        form.setDefaults('name', currentTenant.name);
+        form.clearErrors('name');
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentTenant.id, currentTenant.name]);
+
     const submit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        form.put(settingsUpdate.url(), { preserveScroll: true });
+        form.put(settingsUpdate.url(), {
+            fresh: true,
+            preserveScroll: true,
+            preserveState: false,
+            replace: true,
+        });
     };
 
     return (

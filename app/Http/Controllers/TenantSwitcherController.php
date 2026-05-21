@@ -17,8 +17,9 @@ class TenantSwitcherController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        $tenant = $this->memberships->switchTo($user, $request->tenantId());
+        $this->memberships->switchTo($user, $request->tenantId());
 
+        Inertia::clearHistory();
         Inertia::flash('toast', [
             'type' => 'success',
             'message' => __('Active tenant updated.'),

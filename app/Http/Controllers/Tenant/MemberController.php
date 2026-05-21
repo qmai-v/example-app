@@ -51,7 +51,7 @@ class MemberController extends Controller
         $tenant = $this->tenants->findCurrent();
 
         try {
-            $this->memberships->addMember($tenant, $request->email(), $request->memberRole());
+            $this->memberships->addMember($tenant, $request->memberUserAttributes(), $request->memberRole());
         } catch (MemberAlreadyExistsException $e) {
             return back()->withErrors(['email' => $e->getMessage()]);
         }

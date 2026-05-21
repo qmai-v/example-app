@@ -8,6 +8,7 @@ import ConfirmationDialog from '@/components/confirmation-dialog';
 import GenericTable from '@/components/generic-table';
 import type { GenericTableColumn } from '@/components/generic-table';
 import InputError from '@/components/input-error';
+import PasswordInput from '@/components/password-input';
 import ResourceIndexLayout from '@/components/resource-index-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,8 +58,17 @@ export default function MemberManagementPage({
         null,
     );
 
-    const createForm = useForm<{ email: string; role: TenantRole }>({
+    const createForm = useForm<{
+        name: string;
+        email: string;
+        password: string;
+        password_confirmation: string;
+        role: TenantRole;
+    }>({
+        name: '',
         email: '',
+        password: '',
+        password_confirmation: '',
         role: 'member',
     });
 
@@ -244,6 +254,7 @@ export default function MemberManagementPage({
                 title="Add member"
                 description={addDescription}
                 submitLabel="Add member"
+                contentClassName="sm:max-w-xl"
                 onOpenChange={(open) => {
                     if (!open) {
                         createForm.reset();
@@ -254,18 +265,82 @@ export default function MemberManagementPage({
                 processing={createForm.processing}
             >
                 <div className="space-y-4">
-                    <div className="space-y-1.5">
-                        <Label htmlFor="member-email">Email</Label>
-                        <Input
-                            id="member-email"
-                            type="email"
-                            value={createForm.data.email}
-                            onChange={(event) =>
-                                createForm.setData('email', event.target.value)
-                            }
-                        />
-                        <InputError message={createForm.errors.email} />
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="grid gap-2">
+                            <Label htmlFor="member-name">Name</Label>
+                            <Input
+                                id="member-name"
+                                value={createForm.data.name}
+                                onChange={(event) =>
+                                    createForm.setData(
+                                        'name',
+                                        event.target.value,
+                                    )
+                                }
+                                autoComplete="name"
+                            />
+                            <InputError message={createForm.errors.name} />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="member-email">Email</Label>
+                            <Input
+                                id="member-email"
+                                type="email"
+                                value={createForm.data.email}
+                                onChange={(event) =>
+                                    createForm.setData(
+                                        'email',
+                                        event.target.value,
+                                    )
+                                }
+                                autoComplete="username"
+                                required
+                            />
+                            <InputError message={createForm.errors.email} />
+                        </div>
                     </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="grid gap-2">
+                            <Label htmlFor="member-password">Password</Label>
+                            <PasswordInput
+                                id="member-password"
+                                value={createForm.data.password}
+                                onChange={(event) =>
+                                    createForm.setData(
+                                        'password',
+                                        event.target.value,
+                                    )
+                                }
+                                autoComplete="new-password"
+                            />
+                            <InputError message={createForm.errors.password} />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="member-password-confirmation">
+                                Confirm password
+                            </Label>
+                            <PasswordInput
+                                id="member-password-confirmation"
+                                value={createForm.data.password_confirmation}
+                                onChange={(event) =>
+                                    createForm.setData(
+                                        'password_confirmation',
+                                        event.target.value,
+                                    )
+                                }
+                                autoComplete="new-password"
+                            />
+                            <InputError
+                                message={
+                                    createForm.errors.password_confirmation
+                                }
+                            />
+                        </div>
+                    </div>
+
                     <div className="space-y-1.5">
                         <AppSelect
                             value={createForm.data.role}

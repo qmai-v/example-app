@@ -32,10 +32,17 @@ export function TenantSwitcher() {
             return;
         }
 
+        router.flushAll();
         router.post(
             tenants.switch.url(),
             { tenant_id: tenantId },
-            { preserveScroll: false },
+            {
+                fresh: true,
+                onSuccess: () => router.flushAll(),
+                preserveScroll: false,
+                preserveState: false,
+                replace: true,
+            },
         );
     };
 

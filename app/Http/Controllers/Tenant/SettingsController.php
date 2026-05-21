@@ -34,6 +34,7 @@ class SettingsController extends Controller
 
         $this->tenants->updateName($tenant, $request->tenantName());
 
+        Inertia::clearHistory();
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Tenant settings updated.')]);
 
         return to_route('tenant.settings.edit');

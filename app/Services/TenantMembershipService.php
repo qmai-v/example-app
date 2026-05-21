@@ -12,6 +12,7 @@ use App\Repositories\Contracts\TenantMembershipRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
@@ -89,16 +90,12 @@ class TenantMembershipService extends BaseService
         );
     }
 
-    public function addMember(Tenant $tenant, string $email, TenantMemberRole $role): TenantMembership
+    /**
+     * @param  array{name: ?string, email: string, password: ?string}  $userAttributes
+     */
+    public function addMember(Tenant $tenant, array $userAttributes, TenantMemberRole $role): TenantMembership
     {
-        /** @var User|null $user */
-        $user = User::query()->where('email', $email)->first();
-
-        if ($user === null) {
-            throw ValidationException::withMessages([
-                'email' => __('No user with that email exists.'),
-            ]);
-        }
+        $user = $this->findOrCreateUser($userAttributes);
 
         if ($this->memberships->betweenUserAndTenant($user, $tenant) !== null) {
             throw new MemberAlreadyExistsException;
@@ -160,9 +157,12 @@ class TenantMembershipService extends BaseService
         return $this->memberships->lastTenantAdmin($tenant)?->getKey();
     }
 
-    public function addMemberOnTenant(Tenant $tenant, string $email, TenantMemberRole $role): TenantMembership
+    /**
+     * @param  array{name: ?string, email: string, password: ?string}  $userAttributes
+     */
+    public function addMemberOnTenant(Tenant $tenant, array $userAttributes, TenantMemberRole $role): TenantMembership
     {
-        return $this->addMember($tenant, $email, $role);
+        return $this->addMember($tenant, $userAttributes, $role);
     }
 
     public function changeRoleOnTenant(TenantMembership $membership, TenantMemberRole $role): TenantMembership
@@ -190,6 +190,28 @@ class TenantMembershipService extends BaseService
         if ($this->memberships->countTenantAdmins($membership->tenant) <= 1) {
             throw new LastTenantAdminProtectedException;
         }
+    }
+
+    /**
+     * @param  array{name: ?string, email: string, password: ?string}  $attributes
+     */
+    private function findOrCreateUser(array $attributes): User
+    {
+        /** @var User|null $user */
+        $user = User::query()->where('email', $attributes['email'])->first();
+
+        if ($user !== null) {
+            return $user;
+        }
+
+        /** @var User $createdUser */
+        $createdUser = User::query()->create([
+            'name' => (string) $attributes['name'],
+            'email' => $attributes['email'],
+            'password' => Hash::make((string) $attributes['password']),
+        ]);
+
+        return $createdUser;
     }
 
     /**

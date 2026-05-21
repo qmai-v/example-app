@@ -60,7 +60,7 @@ it('lets a tenant admin list, add, role-change, and remove members in their tena
     expect($membership->fresh())->toBeNull();
 });
 
-it('rejects an attempt to add a user that does not exist', function (): void {
+it('creates and adds a user when adding a member by a new email', function (): void {
     $tenant = Tenant::factory()->create();
     $admin = User::factory()->create();
     createMembership($admin, $tenant, TenantMemberRole::TenantAdmin);
@@ -69,9 +69,39 @@ it('rejects an attempt to add a user that does not exist', function (): void {
         ->withSession(['active_tenant_id' => $tenant->getKey()])
         ->from(route('tenant.members.index'))
         ->post(route('tenant.members.store'), [
+            'name' => 'Ghost User',
             'email' => 'ghost@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+            'role' => TenantMemberRole::Member->value,
         ])
-        ->assertSessionHasErrors('email');
+        ->assertSessionHasNoErrors()
+        ->assertRedirect(route('tenant.members.index'));
+
+    $created = User::query()->where('email', 'ghost@example.com')->first();
+
+    expect($created)->not->toBeNull();
+    expect($created->name)->toBe('Ghost User');
+    expect(TenantMembership::query()
+        ->where('tenant_id', $tenant->getKey())
+        ->where('user_id', $created->getKey())
+        ->where('role', TenantMemberRole::Member->value)
+        ->exists()
+    )->toBeTrue();
+});
+
+it('requires user creation details when adding a member by a new email', function (): void {
+    $tenant = Tenant::factory()->create();
+    $admin = User::factory()->create();
+    createMembership($admin, $tenant, TenantMemberRole::TenantAdmin);
+
+    $this->actingAs($admin)
+        ->withSession(['active_tenant_id' => $tenant->getKey()])
+        ->from(route('tenant.members.index'))
+        ->post(route('tenant.members.store'), [
+            'email' => 'missing-details@example.com',
+        ])
+        ->assertSessionHasErrors(['name', 'password']);
 });
 
 it('rejects adding a user who is already a member', function (): void {

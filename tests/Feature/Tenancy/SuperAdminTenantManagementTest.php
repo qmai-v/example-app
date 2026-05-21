@@ -181,6 +181,38 @@ it('lets a super admin add, change role, and remove members on any tenant', func
     expect($membership->fresh())->toBeNull();
 });
 
+it('lets a super admin create a user while adding a tenant member', function (): void {
+    $superAdmin = User::factory()->superAdmin()->create();
+    $homeTenant = Tenant::factory()->create();
+    createMembership($superAdmin, $homeTenant);
+
+    $target = Tenant::factory()->create();
+    $existingAdmin = User::factory()->create();
+    createMembership($existingAdmin, $target, TenantMemberRole::TenantAdmin);
+
+    $this->actingAs($superAdmin)
+        ->withSession(['active_tenant_id' => $homeTenant->getKey()])
+        ->post(route('admin.tenants.members.store', $target), [
+            'name' => 'Created Invitee',
+            'email' => 'created-invitee@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+            'role' => TenantMemberRole::TenantAdmin->value,
+        ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect(route('admin.tenants.members.index', $target));
+
+    $created = User::query()->where('email', 'created-invitee@example.com')->first();
+
+    expect($created)->not->toBeNull();
+    expect(TenantMembership::query()
+        ->where('tenant_id', $target->getKey())
+        ->where('user_id', $created->getKey())
+        ->where('role', TenantMemberRole::TenantAdmin->value)
+        ->exists()
+    )->toBeTrue();
+});
+
 it('blocks non-super-admins from every admin tenants route', function (): void {
     $member = User::factory()->create();
     $tenant = Tenant::factory()->create();

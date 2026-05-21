@@ -61,11 +61,13 @@ export function AppSidebar() {
                 title: 'Members',
                 href: tenantMembersIndex(),
                 icon: UsersRound,
+                prefetch: false,
             },
             {
                 title: 'Settings',
                 href: tenantSettingsEdit(),
                 icon: Building2,
+                prefetch: false,
             },
         );
     }
