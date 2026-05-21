@@ -19,4 +19,11 @@ abstract class BaseService
 
         return max((int) ceil($total / $perPage), 1);
     }
+
+    public function normalizePerPage(int $perPage): int
+    {
+        return in_array($perPage, self::PER_PAGE_OPTIONS, true)
+            ? $perPage
+            : self::DEFAULT_PER_PAGE;
+    }
 }

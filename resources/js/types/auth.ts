@@ -11,6 +11,32 @@ export type User = {
 
 export type Auth = {
     user: User;
+    isSuperAdmin: boolean;
+};
+
+export type TenantRole = 'tenant_admin' | 'member';
+
+export type TenantStatus = 'active' | 'suspended';
+
+export type ActiveTenant = {
+    id: string;
+    name: string;
+    slug: string;
+    status: TenantStatus;
+};
+
+export type AvailableTenant = {
+    id: string;
+    name: string;
+    slug: string;
+    role: TenantRole | 'super_admin';
+};
+
+export type SharedTenant = {
+    active: ActiveTenant | null;
+    role: TenantRole | null;
+    actingAsSuperAdmin: boolean;
+    available: AvailableTenant[];
 };
 
 /* @chisel-passkeys */

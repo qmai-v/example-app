@@ -1,5 +1,10 @@
 <?php
 
+use App\Models\Enums\TenantMemberRole;
+use App\Models\Tenant;
+use App\Models\TenantMembership;
+use App\Models\User;
+use App\Services\TenantContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -47,4 +52,58 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+function loadTenancyFixtures(): void
+{
+    $migration = require __DIR__.'/Fixtures/2026_05_21_000099_create_tenant_scoped_test_models_table.php';
+    $migration->up();
+}
+
+function createMembership(User $user, Tenant $tenant, TenantMemberRole $role = TenantMemberRole::Member): TenantMembership
+{
+    return TenantMembership::query()->create([
+        'user_id' => $user->getKey(),
+        'tenant_id' => $tenant->getKey(),
+        'role' => $role->value,
+    ]);
+}
+
+function actingAsMember(User $user, Tenant $tenant): User
+{
+    createMembership($user, $tenant, TenantMemberRole::Member);
+    setActiveTenantContext($tenant, actingAsSuperAdmin: false);
+    test()->actingAs($user)->withSession(['active_tenant_id' => $tenant->getKey()]);
+
+    return $user;
+}
+
+function actingAsTenantAdmin(User $user, Tenant $tenant): User
+{
+    createMembership($user, $tenant, TenantMemberRole::TenantAdmin);
+    setActiveTenantContext($tenant, actingAsSuperAdmin: false);
+    test()->actingAs($user)->withSession(['active_tenant_id' => $tenant->getKey()]);
+
+    return $user;
+}
+
+function actingAsSuperAdmin(User $user, ?Tenant $tenant = null): User
+{
+    $user->forceFill(['is_super_admin' => true])->save();
+
+    if ($tenant !== null) {
+        setActiveTenantContext($tenant, actingAsSuperAdmin: ! $user->belongsToTenant($tenant));
+        test()->actingAs($user)->withSession(['active_tenant_id' => $tenant->getKey()]);
+    } else {
+        test()->actingAs($user);
+    }
+
+    return $user;
+}
+
+function setActiveTenantContext(Tenant $tenant, bool $actingAsSuperAdmin = false): void
+{
+    /** @var TenantContext $context */
+    $context = app(TenantContext::class);
+    $context->set($tenant, $actingAsSuperAdmin);
 }

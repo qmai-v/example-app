@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Support\Facades\RateLimiter;
 use Laravel\Fortify\Features;
@@ -12,6 +13,8 @@ test('login screen can be rendered', function () {
 
 test('users can authenticate using the login screen', function () {
     $user = User::factory()->create();
+    $tenant = Tenant::factory()->create();
+    createMembership($user, $tenant);
 
     $response = $this->post(route('login.store'), [
         'email' => $user->email,

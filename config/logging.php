@@ -127,6 +127,16 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        // Security-relevant tenancy events (see FR-022). Routed to its own daily log
+        // file so tenancy audit history is grep-able and not lost in the main stack.
+        'tenancy_audit' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/tenancy-audit.log'),
+            'level' => 'info',
+            'days' => env('TENANCY_AUDIT_LOG_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
     ],
 
 ];

@@ -47,4 +47,11 @@ class UserFactory extends Factory
      * Indicate that the model has two-factor authentication configured.
      */
     public function withTwoFactor(): static {}
+
+    public function superAdmin(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'is_super_admin' => true,
+        ]);
+    }
 }
