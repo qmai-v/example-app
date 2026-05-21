@@ -1,2 +1,9 @@
+node_modules/
+dist/
+build/
+coverage/
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
 resources/js/components/ui/*
 resources/views/mail/*
