@@ -41,18 +41,29 @@
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 - **Laravel-first architecture**: Confirm the plan uses Laravel conventions,
-  named routes, Eloquent, validation, authorization, and Artisan-generated files
-  where applicable.
+  named routes, Eloquent, Form Request validation, Fortify primitives, policy
+  authorization, and Artisan-generated files where applicable.
+- **Layered service + repository pattern**: Confirm controllers stay thin and
+  delegate to `app/Services/` classes (extending `BaseService`), and that
+  persistence flows through `app/Repositories/` classes (extending
+  `BaseRepository<TModel>` with a typed contract under
+  `app/Repositories/Contracts/`). Cite the sibling service/repository the new
+  work mirrors.
 - **Inertia React contracts**: Confirm SPA pages live in `resources/js/pages`,
-  server routes use Inertia responses, Wayfinder route/action imports are used
-  where available, and deferred props include loading or empty states.
-- **Programmatic testing**: List the Pest, frontend, build, or static checks
-  that will prove the behavior, including the minimum command set to run.
+  server routes use `Inertia::render()` responses, Wayfinder route/action
+  imports are used where available, and deferred/optional props include
+  loading or empty states.
+- **Programmatic testing**: List the Pest feature tests, unit tests, frontend
+  lint/format/type checks, and the minimum
+  `php artisan test --compact --filter=<Target>` command set that will prove
+  the behavior.
 - **Structure and dependencies**: Confirm no new base directories or
-  dependencies are introduced without explicit approval, and cite existing
-  sibling patterns to follow.
-- **Tooling and observability**: Identify required Pint, ESLint, Prettier,
-  TypeScript, Artisan, database, browser-log, or Laravel Boost checks.
+  `composer.json`/`package.json` dependencies are introduced without explicit
+  approval, and cite existing sibling patterns to follow.
+- **Tooling and observability**: Identify required `vendor/bin/pint --dirty
+  --format agent`, ESLint, Prettier, TypeScript, Artisan, database, and
+  Laravel Boost MCP (`search-docs`, `database-query`, `database-schema`,
+  `get-absolute-url`, `browser-logs`) checks.
 
 ## Project Structure
 
